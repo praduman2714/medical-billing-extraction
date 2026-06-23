@@ -16,6 +16,11 @@ class ServiceContainer:
         self._extraction_service: ExtractionService | None = None
 
     @property
+    def context_manager(self) -> ContextManager:
+        return self._context_manager
+
+
+    @property
     def job_service(self) -> JobService:
         if self._job_service is None:
             self._job_service = JobService(self._context_manager)
