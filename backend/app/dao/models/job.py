@@ -25,8 +25,10 @@ class Job(TimestampBase):
     )
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, nullable=False)
     pdf_filename: Mapped[str] = mapped_column(String, nullable=False)
     pdf_path: Mapped[str] = mapped_column(String, nullable=False)
+    pdf_hash: Mapped[str | None] = mapped_column(String, nullable=True)
     status: Mapped[str] = mapped_column(String, nullable=False, default="pending")
     result: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -36,3 +38,6 @@ class Job(TimestampBase):
     completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    token_usage: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(nullable=True)
+    processing_duration_seconds: Mapped[float | None] = mapped_column(nullable=True)

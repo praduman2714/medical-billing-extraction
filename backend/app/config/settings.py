@@ -8,6 +8,7 @@ class Settings(BaseSettings):
 
     # Postgres
     POSTGRES_CONNECTION_STRING: str
+    APP_DB_CONNECTION_STRING: str | None = None
 
     # App
     PDF_MOUNT_PATH: str = "/app/pdfs"
