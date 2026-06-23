@@ -18,6 +18,13 @@ async def run() -> None:
     4. If the queue is empty, sleep and retry
     """
     settings = get_settings()
+    
+    # Override connection string for worker role
+    if settings.APP_DB_CONNECTION_STRING:
+        settings.APP_DB_CONNECTION_STRING = settings.APP_DB_CONNECTION_STRING.replace(
+            "billing_app:billing_app@", "billing_worker:billing_worker@"
+        )
+        
     context_manager = ContextManager(settings)
     await context_manager.initialize()
     container = ServiceContainer(context_manager)
@@ -27,17 +34,17 @@ async def run() -> None:
     while True:
         try:
             # Recover jobs claimed by a crashed worker (no update for 5+ minutes)
-            # await container.job_service.recover_stalled()
+            recovered = await container.job_service.job_dao.recover_stalled()
+            if recovered > 0:
+                logger.info("worker_recovered_stalled_jobs", count=recovered)
 
             # Claim and process the next pending job
-            # job = await container.job_service.claim_next_job()
-            # if job:
-            #     logger.info("job_claimed", job_id=job["id"])
-            #     await container.extraction_service.process_job(job["id"])
-            # else:
-            #     await asyncio.sleep(settings.WORKER_POLL_INTERVAL_SECONDS)
-
-            await asyncio.sleep(settings.WORKER_POLL_INTERVAL_SECONDS)
+            job = await container.job_service.job_dao.claim_next_job()
+            if job:
+                logger.info("job_claimed", job_id=job["id"])
+                await container.extraction_service.process_job(job["id"])
+            else:
+                await asyncio.sleep(settings.WORKER_POLL_INTERVAL_SECONDS)
 
         except Exception:
             logger.exception("worker_loop_error")

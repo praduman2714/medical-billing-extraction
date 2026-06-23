@@ -50,19 +50,17 @@ services:
     deploy:
       replicas: 2
 
-  # Add your Next.js + Better Auth frontend here and it will come up with the stack.
-  # It should build from ./frontend, serve on port 3000, and depend on postgres (and the
-  # api healthcheck if it calls the backend at startup). Example skeleton:
-  #
-  # web:
-  #   build: ./frontend
-  #   env_file: .env
-  #   depends_on:
-  #     api:
-  #       condition: service_healthy
-  #   ports:
-  #     - "3000:3000"
-  #   restart: on-failure
+  web:
+    build: ./frontend
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    restart: on-failure
 
 volumes:
   postgres_data:
