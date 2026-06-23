@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     WORKER_POLL_INTERVAL_SECONDS: int = 5
 
     model_config = {
-        "env_file": ".env",
+        "env_file": (".env", "../.env"),
         "case_sensitive": True,
         "extra": "ignore",
     }

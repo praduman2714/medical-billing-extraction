@@ -46,7 +46,9 @@ class PostgresProvider(BaseDatabaseProvider):
             async with await self.get_session() as session:
                 await session.execute(text("SELECT 1"))
                 return True
-        except Exception:
+        except Exception as e:
+            from app.core.common.logger import get_logger
+            get_logger("postgres").exception("health_check_failed", error=str(e))
             return False
 
     async def close(self) -> None:

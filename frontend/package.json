@@ -9,11 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "better-auth": "^1.6.20",
-    "next": "16.2.9",
+    "better-auth": "^1.4.3",
+    "next": "^14.2.35",
     "pg": "^8.22.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20",

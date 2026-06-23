@@ -90,9 +90,13 @@ def upgrade() -> None:
     BEGIN
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'billing_app') THEN
             CREATE ROLE billing_app WITH LOGIN PASSWORD 'billing_app';
+        ELSE
+            ALTER ROLE billing_app WITH LOGIN PASSWORD 'billing_app';
         END IF;
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'billing_worker') THEN
             CREATE ROLE billing_worker WITH LOGIN PASSWORD 'billing_worker';
+        ELSE
+            ALTER ROLE billing_worker WITH LOGIN PASSWORD 'billing_worker';
         END IF;
     END
     $$;
