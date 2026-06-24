@@ -187,6 +187,58 @@ class TestExtractionService(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(call_kwargs["status"], "failed")
         self.assertIn("PDF file is corrupted", call_kwargs["error"])
 
+    @patch("app.service.extraction_service.JobDAO")
+    @patch("pypdf.PdfReader")
+    @patch("app.service.extraction_service.ExtractionOrchestrator")
+    @patch("asyncio.sleep")
+    async def test_process_job_transient_retry_success(self, mock_sleep, mock_orchestrator_class, mock_pdf_reader_class, mock_job_dao_class):
+        # Mock dependencies
+        mock_context_manager = MagicMock()
+        
+        # Instance mock of DAO
+        mock_dao = mock_job_dao_class.return_value
+        mock_dao.get = AsyncMock(return_value={
+            "id": "job_abc",
+            "user_id": "user_123",
+            "pdf_path": "/app/pdfs/test.pdf",
+            "status": "pending",
+        })
+        mock_dao.update_status = AsyncMock()
+
+        # Instance mock of PDF Reader
+        mock_pdf = mock_pdf_reader_class.return_value
+        mock_page = MagicMock()
+        mock_page.extract_text.return_value = "Treatment on 2026-06-23. CPT: 99213. Charges: $150.00."
+        mock_pdf.pages = [mock_page]
+
+        # Instance mock of Orchestrator
+        mock_orch = mock_orchestrator_class.return_value
+        mock_orch.run = AsyncMock()
+        
+        # Raise rate limit error on first call, return success result on second
+        mock_orch.run.side_effect = [
+            Exception("Rate limit exceeded"),
+            OrchestratorResult(
+                echo_result="Extracted successfully after retry",
+                billing_records=[{"treatment_date": "2026-06-23", "cpt_code": "99213", "charges": 150.00}],
+                run_metrics={"stage_1": RunMetrics(total_input_tokens=10, total_output_tokens=5, cost_usd=0.01)},
+                wall_clock_seconds=1.2
+            )
+        ]
+
+        # Instantiate and run service
+        service = ExtractionService(mock_context_manager)
+        await service.process_job("job_abc")
+
+        # Verify calls
+        self.assertEqual(mock_orch.run.call_count, 2)
+        mock_sleep.assert_called_once_with(1)  # 2^0 = 1 second sleep on 1st retry
+        
+        # Check database update is completed successfully
+        mock_dao.update_status.assert_called_once()
+        call_kwargs = mock_dao.update_status.call_args[1]
+        self.assertEqual(call_kwargs["status"], "completed")
+
 
 if __name__ == "__main__":
     unittest.main()

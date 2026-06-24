@@ -1,4 +1,5 @@
 import time
+import asyncio
 import pypdf
 from app.core.context_manager import ContextManager, current_user_id_ctx
 from app.dao.pg.job_dao import JobDAO
@@ -62,10 +63,53 @@ class ExtractionService(BaseService):
                 pages=pages,
             )
             
-            # 3. Build RunContext and run orchestrator
+            # 3. Build RunContext and run orchestrator with retry policy for transient errors
             ctx = RunContext(document=doc)
             orchestrator = ExtractionOrchestrator()
-            result = await orchestrator.run(ctx)
+            
+            max_retries = 3
+            backoff_base = 2
+            result = None
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    result = await orchestrator.run(ctx)
+                    break
+                except Exception as e:
+                    # Check if error is transient / retryable
+                    is_transient = False
+                    err_msg = str(e).lower()
+                    err_type = type(e).__name__
+                    
+                    if (
+                        "ratelimit" in err_type.lower() or
+                        "timeout" in err_type.lower() or
+                        "connection" in err_type.lower() or
+                        "rate limit" in err_msg or
+                        "timeout" in err_msg or
+                        "connection" in err_msg or
+                        "500" in err_msg or
+                        "502" in err_msg or
+                        "503" in err_msg or
+                        "504" in err_msg or
+                        "apierror" in err_type.lower()
+                    ):
+                        is_transient = True
+                        
+                    if is_transient and attempt < max_retries:
+                        sleep_time = backoff_base ** attempt
+                        self.logger.warning(
+                            "transient_error_encountered_retrying",
+                            job_id=job_id,
+                            attempt=attempt + 1,
+                            max_retries=max_retries,
+                            error=str(e),
+                            sleep_seconds=sleep_time
+                        )
+                        await asyncio.sleep(sleep_time)
+                    else:
+                        # Non-transient error, or retries exhausted
+                        raise e
             
             # 4. Aggregate metrics
             total_prompt_tokens = 0

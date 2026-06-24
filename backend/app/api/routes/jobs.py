@@ -1,7 +1,7 @@
 import os
 import hashlib
 import asyncio
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, Header, Query
 
 from app.api.dependencies.container import get_container
 from app.api.dependencies.auth import get_current_user_id
@@ -15,6 +15,8 @@ router = APIRouter()
 @router.post("/")
 async def create_job(
     file: UploadFile = File(...),
+    bypass_cache: bool = Query(False, description="Bypass content-based caching for this upload."),
+    x_bypass_cache: str | None = Header(None, description="Bypass content-based caching for this upload."),
     container: ServiceContainer = Depends(get_container),
     user_id: str = Depends(get_current_user_id),
 ) -> SuccessResponse:
@@ -28,8 +30,9 @@ async def create_job(
     content = await file.read()
     pdf_hash = hashlib.sha256(content).hexdigest()
 
-    # 2. Check for cache hit
-    cached_job = await container.job_service.get_cached_job(pdf_hash)
+    # 2. Check for cache hit (unless bypass is requested)
+    bypass = bypass_cache or (x_bypass_cache is not None and x_bypass_cache.lower() in ("true", "1", "yes"))
+    cached_job = None if bypass else await container.job_service.get_cached_job(pdf_hash)
     
     settings = container._context_manager._settings
     os.makedirs(settings.PDF_MOUNT_PATH, exist_ok=True)
