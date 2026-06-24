@@ -27,3 +27,11 @@ ECHO_AGENT_CONFIG = AgentConfig(
 )
 
 # Add further AgentConfig constants here for additional agents.
+EXTRACTOR_AGENT_CONFIG = AgentConfig(
+    model="gpt-4o-mini",
+    model_settings=ModelSettings(
+        verbosity="low",
+    ),
+    instructions_key="extractor/system.j2",
+    input_key="extractor/user.j2",
+)

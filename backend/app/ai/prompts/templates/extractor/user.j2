@@ -1,0 +1,12 @@
+Document ID: {{ doc_id }}
+Total Pages: {{ total_pages }}
+
+Below is the text content of the pages in the medical billing document. Read all pages carefully:
+
+{% for page in pages %}
+=================== PAGE {{ page.page_num }} ===================
+{{ page.page_content }}
+
+{% endfor %}
+
+Please extract the billing records and flagged records from this document. Call the `save_extracted_records` tool with the extracted data.
