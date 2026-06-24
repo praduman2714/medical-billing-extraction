@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.ai.prompts.prompt_loader import PromptLoader
 from app.ai.types import Document
+from app.models.extraction import BillingRecord, FlaggedRecord
 
 
 def new_session_id(doc_id: str) -> str:
@@ -28,6 +29,8 @@ class RunContext(BaseModel):
     document: Document
     prompt_loader: PromptLoader = Field(default_factory=PromptLoader)
     session_id: str | None = None
+    billing_records: list[BillingRecord] = Field(default_factory=list)
+    flagged_records: list[FlaggedRecord] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def default_session_id(self) -> Self:
