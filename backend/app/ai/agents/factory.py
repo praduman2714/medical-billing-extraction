@@ -1,8 +1,8 @@
 from agents import Agent, RunContextWrapper
 
-from app.ai.config import ECHO_AGENT_CONFIG
+from app.ai.config import ECHO_AGENT_CONFIG, EXTRACTOR_AGENT_CONFIG
 from app.ai.context import RunContext
-from app.ai.tools import echo_tool
+from app.ai.tools import echo_tool, save_extracted_records
 
 
 class AgentFactory:
@@ -30,4 +30,23 @@ class AgentFactory:
             model=ECHO_AGENT_CONFIG.model,
             model_settings=ECHO_AGENT_CONFIG.model_settings,
             tools=[echo_tool],
+        )
+
+    @staticmethod
+    def build_extractor_agent() -> Agent[RunContext]:
+        """Extractor agent — full working example for the executor pattern."""
+
+        async def instructions(
+            wrapper: RunContextWrapper[RunContext], agent: Agent
+        ) -> str:
+            return await wrapper.context.prompt_loader.render(
+                EXTRACTOR_AGENT_CONFIG.instructions_key, {}
+            )
+
+        return Agent[RunContext](
+            name="extractor_agent",
+            instructions=instructions,
+            model=EXTRACTOR_AGENT_CONFIG.model,
+            model_settings=EXTRACTOR_AGENT_CONFIG.model_settings,
+            tools=[save_extracted_records],
         )
