@@ -88,7 +88,7 @@ class ExtractionService(BaseService):
             # 5. Save completed status and results
             job_result = {
                 "billing_records": result.billing_records,
-                "flagged_records": [],
+                "flagged_records": result.flagged_records,
             }
             
             await self.job_dao.update_status(
