@@ -14,7 +14,7 @@ Our medical billing extraction platform comprises a Next.js web frontend, Better
 2. **Document Upload:** The client uploads a PDF. The Next.js API route (or client direct request) calls the FastAPI backend, passing the session token.
 3. **Queueing & RLS:** FastAPI validates the session, writes a `pending` job to the `jobs` table (enforced by RLS), and saves the PDF.
 4. **Worker Loop:** Background workers running under the `billing_worker` role query the queue, claim a job atomically, parse the PDF using `pypdf`, run the AI extraction orchestration pipeline, and save the resulting records.
-5. **Isolation-Correct View:** The client page polls the API and renders the extracted billing records and manual review flags in a premium dark-themed dashboard.
+5. **Isolation-Correct View:** The client page polls the API and renders the extracted billing records and manual review flags in a premium dark or light themed dashboard.
 
 ---
 

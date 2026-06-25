@@ -43,6 +43,7 @@ class ExtractorAgentExecutor:
 
     async def run(self, ctx: RunContext) -> tuple[str, Usage]:
         """Run the extractor agent over chunks of pages and return (output_text, usage)."""
+        import asyncio
         self.logger.info("extractor_agent_started", doc_id=ctx.document.doc_id)
 
         pages = ctx.document.pages
@@ -53,9 +54,8 @@ class ExtractorAgentExecutor:
             chunks = [[]] # Handle empty document
 
         total_usage = Usage()
-        all_outputs = []
-
-        for i, chunk in enumerate(chunks):
+        
+        async def process_chunk(i: int, chunk: list) -> tuple[str, Usage]:
             self.logger.info("extractor_agent_chunk_started", doc_id=ctx.document.doc_id, chunk_index=i+1, total_chunks=len(chunks))
             user_text = await self._render_user(ctx, chunk)
 
@@ -73,10 +73,14 @@ class ExtractorAgentExecutor:
                 if isinstance(result.final_output, str)
                 else str(result.final_output)
             )
-            all_outputs.append(output)
+            return output, result.context_wrapper.usage
 
-            # Accumulate usage
-            chunk_usage = result.context_wrapper.usage
+        tasks = [process_chunk(i, chunk) for i, chunk in enumerate(chunks)]
+        results = await asyncio.gather(*tasks)
+
+        all_outputs = []
+        for output, chunk_usage in results:
+            all_outputs.append(output)
             total_usage.input_tokens += chunk_usage.input_tokens
             total_usage.output_tokens += chunk_usage.output_tokens
             total_usage.requests += chunk_usage.requests
