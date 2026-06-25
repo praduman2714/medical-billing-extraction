@@ -55,7 +55,8 @@ class ExtractorAgentExecutor:
         total_usage = Usage()
         all_outputs = []
 
-        for chunk in chunks:
+        for i, chunk in enumerate(chunks):
+            self.logger.info("extractor_agent_chunk_started", doc_id=ctx.document.doc_id, chunk_index=i+1, total_chunks=len(chunks))
             user_text = await self._render_user(ctx, chunk)
 
             result = await Runner.run(
@@ -64,6 +65,8 @@ class ExtractorAgentExecutor:
                 context=ctx,
                 max_turns=self.max_turns,
             )
+
+            self.logger.info("extractor_agent_chunk_completed", doc_id=ctx.document.doc_id, chunk_index=i+1, total_chunks=len(chunks))
 
             output = (
                 result.final_output
