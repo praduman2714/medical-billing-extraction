@@ -59,13 +59,13 @@ If a `WHERE` clause is missing or incorrect in our application code, RLS prevent
 ## 3. Agent Design
 
 ### 3.1 Tools
-- **`echo_tool`:** Runs a lightweight test loop. Included as part of the starter pipeline.
+- **`save_extracted_records`:** The core extraction tool. It was modified to iteratively aggregate records using `list.extend()` so that when processing large documents across multiple chunks, all records are properly accumulated into a single final output.
 - No high-level agent frameworks (like LangChain) are used; the tool calling and orchestrator logic is built directly in vanilla Python and Pydantic models.
 
-### 3.2 Navigation Strategy
+### 3.2 Navigation Strategy (Chunking)
 - **File Text Extraction:** The worker uses `pypdf` to extract the plain-text content of each page.
-- **RunContext Structure:** The text of the document is structured page-by-page into a `Document` pydantic model and passed inside a `RunContext`.
-- **Table splits:** When a document has split tables, the orchestrator compiles all page content sequentially so the LLM is presented with the complete, uninterrupted context of the ledger pages.
+- **Chunked Processing:** To strictly avoid LLM `Context Length Exceeded` errors on massive medical ledgers, the `ExtractorAgentExecutor` splits the document into batches of 10 pages. Each chunk is processed sequentially, and the agent's context is refreshed for the next chunk while accumulating the extracted records.
+- **Schema Normalization:** The Pydantic output models (`BillingRecord`, `FlaggedRecord`) use `alias_generator=to_camel` and `model_dump(by_alias=True)`. This ensures that all extracted JSON perfectly matches the `camelCase` structure of the ground-truth downstream systems, completely decoupling the Python snake_case conventions from the API contract.
 
 ### 3.3 State Management
 - Agent state is stored in the `RunContext` object. Executors append their metadata and output results to fields on `RunContext`, allowing downstream stages to inspect previous outputs.
@@ -119,7 +119,7 @@ If a worker crashes mid-job, the job status remains `processing`. The worker loo
 
 - **Structure:** Built with Next.js 16 (App Router), TypeScript, and Vanilla CSS.
 - **Features:** Supports Sign-up, Login, and a full-featured Dashboard. Includes a drag-and-drop file zone, live job status polling, and a modal showing detailed grids of extracted records.
-- **Styling:** Premium dark-themed layout with custom glassmorphism effects, glowing active badges, and animated states.
+- **Styling & Theming:** Premium CSS-variable-based design system featuring glassmorphism, dynamic glowing status badges, and smooth micro-animations. It includes a fully functional Light/Dark mode toggle that persists user preference to `localStorage`.
 
 ---
 

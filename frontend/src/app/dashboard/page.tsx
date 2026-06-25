@@ -78,7 +78,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
-  
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -164,7 +164,7 @@ export default function DashboardPage() {
   // Auto-polling for pending/processing jobs
   useEffect(() => {
     if (!session) return;
-    
+
     const hasUnfinishedJobs = jobs.some(
       (job) => job.status === "pending" || job.status === "processing"
     );
@@ -192,7 +192,7 @@ export default function DashboardPage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type === "application/pdf") {
@@ -351,7 +351,7 @@ export default function DashboardPage() {
       <nav className={styles.navbar}>
         <div className={styles.navLogo}>
           <div className={styles.logoIcon}>+</div>
-          <span>Antigravity Billing RLS</span>
+          <span>Billing RLS</span>
         </div>
         <div className={styles.navUser}>
           <button className={styles.themeToggleBtn} onClick={toggleTheme} title="Toggle Theme">
@@ -372,9 +372,9 @@ export default function DashboardPage() {
         {/* Left column: Upload Panel */}
         <section className={styles.uploadCard}>
           <h2 className={styles.panelTitle}>Upload Document</h2>
-          
+
           <form onSubmit={handleUpload}>
-            <div 
+            <div
               className={`${styles.dropzone} ${isDragActive ? styles.dropzoneActive : ""}`}
               onDragEnter={handleDrag}
               onDragOver={handleDrag}
@@ -574,13 +574,13 @@ export default function DashboardPage() {
                           const date = rec.treatmentDate || rec.treatment_date || rec.dateOfService || rec.date_of_service || "-";
                           const prov = rec.provider || rec.providerName || rec.provider_name || "-";
                           const desc = rec.description || rec.procedureDescription || rec.procedure_description || "-";
-                          
+
                           const codes = rec.cptCodes || rec.cpt_codes;
                           const code = rec.cptCode || rec.cpt_code;
                           const cpt = Array.isArray(codes)
                             ? codes.join(", ")
                             : code || (typeof codes === "string" ? codes : "-");
-                          
+
                           const chargesVal = rec.charges !== undefined ? rec.charges : (rec.totalCharges !== undefined ? rec.totalCharges : rec.total_charges);
                           const paidVal = rec.paid !== undefined ? rec.paid : (rec.insPaid !== undefined ? rec.insPaid : (rec.ins_paid !== undefined ? rec.ins_paid : (rec.amountPaid !== undefined ? rec.amountPaid : rec.amount_paid)));
                           const page = rec.page !== undefined ? rec.page : (rec.pageNumber !== undefined ? rec.pageNumber : rec.page_number);
@@ -644,7 +644,7 @@ export default function DashboardPage() {
               <p style={{ color: "var(--foreground-muted)", fontSize: "14px", marginBottom: "8px" }}>
                 The extraction job failed with the following error. You can copy this error for troubleshooting or request to reprocess the document.
               </p>
-              
+
               <div className={styles.errorBox}>
                 {errorModalJob.error || "Unknown error occurred."}
               </div>
