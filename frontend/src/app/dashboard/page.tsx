@@ -73,6 +73,8 @@ export default function DashboardPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [errorModalJob, setErrorModalJob] = useState<Job | null>(null);
+  const [copiedError, setCopiedError] = useState(false);
   const [modalTab, setModalTab] = useState<"records" | "flags">("records");
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -249,6 +251,42 @@ export default function DashboardPage() {
     }
   };
 
+  // Reprocess failed or cancelled job
+  const handleReprocessJob = async (jobId: string) => {
+    if (!session) return;
+    try {
+      const sessionResult = await authClient.getSession();
+      const token = sessionResult.data?.session?.token;
+      if (!token) return;
+
+      const res = await fetch(`${API_BASE_URL}/jobs/${jobId}/reprocess`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        setErrorModalJob(null);
+        fetchJobs();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Failed to trigger reprocessing.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error reprocessing job.");
+    }
+  };
+
+  const handleCopyError = (errorText: string) => {
+    navigator.clipboard.writeText(errorText);
+    setCopiedError(true);
+    setTimeout(() => {
+      setCopiedError(false);
+    }, 2000);
+  };
+
+
   const handleSignOut = async () => {
     await authClient.signOut({
       callbackURL: "/auth/login",
@@ -422,12 +460,23 @@ export default function DashboardPage() {
                       </button>
                     )}
                     {job.status === "failed" && (
-                      <button
-                        onClick={() => alert(`Job failed with error:\n${job.error || "Unknown error occurred"}`)}
-                        className={`${styles.actionBtn} ${styles.btnDanger}`}
-                      >
-                        View Error
-                      </button>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          onClick={() => {
+                            setErrorModalJob(job);
+                            setCopiedError(false);
+                          }}
+                          className={`${styles.actionBtn} ${styles.btnSecondary}`}
+                        >
+                          View Error
+                        </button>
+                        <button
+                          onClick={() => handleReprocessJob(job.id)}
+                          className={`${styles.actionBtn} ${styles.btnPrimary}`}
+                        >
+                          Reprocess
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -535,6 +584,43 @@ export default function DashboardPage() {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Detail Modal */}
+      {errorModalJob && (
+        <div className={styles.modalOverlay} onClick={() => setErrorModalJob(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Job Failed: {errorModalJob.pdf_filename}</h3>
+              <button className={styles.modalClose} onClick={() => setErrorModalJob(null)}>✕</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <p style={{ color: "var(--foreground-muted)", fontSize: "14px", marginBottom: "8px" }}>
+                The extraction job failed with the following error. You can copy this error for troubleshooting or request to reprocess the document.
+              </p>
+              
+              <div className={styles.errorBox}>
+                {errorModalJob.error || "Unknown error occurred."}
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button
+                  onClick={() => handleCopyError(errorModalJob.error || "Unknown error occurred.")}
+                  className={`${styles.actionBtn} ${styles.btnSecondary}`}
+                >
+                  {copiedError ? "Copied!" : "Copy Error"}
+                </button>
+                <button
+                  onClick={() => handleReprocessJob(errorModalJob.id)}
+                  className={`${styles.actionBtn} ${styles.btnPrimary}`}
+                >
+                  Reprocess Job
+                </button>
+              </div>
             </div>
           </div>
         </div>

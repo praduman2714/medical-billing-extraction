@@ -66,8 +66,8 @@ class ExtractionOrchestrator:
         )
 
         # Serialize billing and flagged records from the run context
-        billing_records_dict = [rec.model_dump() for rec in ctx.billing_records]
-        flagged_records_dict = [rec.model_dump() for rec in ctx.flagged_records]
+        billing_records_dict = [rec.model_dump(by_alias=True) for rec in ctx.billing_records]
+        flagged_records_dict = [rec.model_dump(by_alias=True) for rec in ctx.flagged_records]
 
         return OrchestratorResult(
             echo_result=extractor_output,

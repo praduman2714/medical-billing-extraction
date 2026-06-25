@@ -158,6 +158,26 @@ class JobDAO(BasePgDAO[Job]):
         await self._update(orm)
         return True
 
+    async def reprocess(self, job_id: str) -> dict | None:
+        """Reset a job back to pending status, clearing errors and results."""
+        orm = await self._get_by_id(job_id)
+        if not orm:
+            return None
+        
+        orm.status = "pending"
+        orm.result = None
+        orm.error = None
+        orm.token_usage = None
+        orm.cost_usd = None
+        orm.processing_duration_seconds = None
+        orm.started_at = None
+        orm.completed_at = None
+        orm.updated_at = utc_now()
+        
+        updated = await self._update(orm)
+        return self._to_dto(updated)
+
+
     async def claim_next_job(self) -> dict | None:
         """Atomically claim the next pending job for processing.
 

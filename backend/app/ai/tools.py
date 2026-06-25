@@ -39,6 +39,6 @@ async def save_extracted_records(
     Returns:
         A confirmation message that the records have been saved.
     """
-    ctx.context.billing_records = records
-    ctx.context.flagged_records = flagged
+    ctx.context.billing_records.extend(records)
+    ctx.context.flagged_records.extend(flagged)
     return f"Successfully saved {len(records)} billing records and {len(flagged)} flagged records to context."

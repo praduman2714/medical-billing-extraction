@@ -172,3 +172,29 @@ async def cancel_job(
         message="Job cancelled successfully.",
         data=job,
     )
+
+
+@router.post("/{job_id}/reprocess")
+async def reprocess_job(
+    job_id: str,
+    container: ServiceContainer = Depends(get_container),
+    user_id: str = Depends(get_current_user_id),
+) -> SuccessResponse:
+    """Reset a failed or cancelled job back to pending status for reprocessing.
+
+    Returns 400 if the job is not in failed or cancelled status.
+    Returns 404 if the job does not exist.
+    """
+    try:
+        job = await container.job_service.reprocess_job(job_id)
+        return SuccessResponse(
+            success=True,
+            message="Job reset to pending for reprocessing.",
+            data=job,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+

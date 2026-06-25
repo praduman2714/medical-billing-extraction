@@ -1,5 +1,21 @@
+import os
+from pathlib import Path
 from functools import lru_cache
 from pydantic_settings import BaseSettings
+
+# Proactively load env files to ensure any imported client library has access to credentials immediately
+for env_path in [Path(".env"), Path("../.env")]:
+    if env_path.exists():
+        with open(env_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip().strip("'\"")
+                    if not os.environ.get(k):
+                        os.environ[k] = v
+
 
 
 class Settings(BaseSettings):
@@ -21,6 +37,12 @@ class Settings(BaseSettings):
         "case_sensitive": True,
         "extra": "ignore",
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        import os
+        if self.OPENAI_API_KEY:
+            os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
 
 
 @lru_cache

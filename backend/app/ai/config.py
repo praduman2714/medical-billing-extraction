@@ -20,7 +20,7 @@ ECHO_AGENT_CONFIG = AgentConfig(
     model="gpt-5.4-nano",
     model_settings=ModelSettings(
         reasoning=Reasoning(effort="none"),
-        verbosity="low",
+        verbosity="medium",
     ),
     instructions_key="echo/system.j2",
     input_key="echo/user.j2",
@@ -30,8 +30,9 @@ ECHO_AGENT_CONFIG = AgentConfig(
 EXTRACTOR_AGENT_CONFIG = AgentConfig(
     model="gpt-4o-mini",
     model_settings=ModelSettings(
-        verbosity="low",
+        verbosity="medium",
     ),
     instructions_key="extractor/system.j2",
     input_key="extractor/user.j2",
 )
+

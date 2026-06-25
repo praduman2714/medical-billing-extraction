@@ -7,13 +7,15 @@ attribute. ``docs/schema.md`` defers to this module for ``BillingRecord`` and
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 Severity = Literal["low", "medium", "high"]
 
 
 class BillingRecord(BaseModel):
     """One billing episode row in the extraction result."""
+    model_config = ConfigDict(populate_by_name=True, alias_generator=to_camel)
 
     treatment_date: str = Field(
         description=(
@@ -78,6 +80,7 @@ class BillingRecord(BaseModel):
 
 class FlaggedRecord(BaseModel):
     """Issue requiring manual review; may or may not tie to a specific output row."""
+    model_config = ConfigDict(populate_by_name=True, alias_generator=to_camel)
 
     row: int | None = Field(
         default=None,

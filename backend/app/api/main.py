@@ -1,3 +1,4 @@
+import app.config.settings  # noqa: F401
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request

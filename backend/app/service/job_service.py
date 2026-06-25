@@ -67,3 +67,23 @@ class JobService(BaseService):
     async def get_cached_job(self, pdf_hash: str) -> dict | None:
         """Check if a successfully completed job exists with this hash for the current user."""
         return await self.job_dao.get_completed_by_hash(pdf_hash)
+
+    async def reprocess_job(self, job_id: str) -> dict:
+        """Reset a failed or cancelled job back to pending status for reprocessing.
+
+        Raises JobNotFoundException if the job does not exist.
+        Raises ValueError if the job is not in failed or cancelled status.
+        Returns the updated job as a DTO dict.
+        """
+        job = await self.job_dao.get(job_id)
+        if not job:
+            raise JobNotFoundException(job_id)
+            
+        if job["status"] not in ("failed", "cancelled"):
+            raise ValueError(f"Job {job_id} is in status '{job['status']}' and cannot be reprocessed.")
+            
+        updated = await self.job_dao.reprocess(job_id)
+        if not updated:
+            raise JobNotFoundException(job_id)
+        return updated
+
