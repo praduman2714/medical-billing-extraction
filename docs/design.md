@@ -138,7 +138,7 @@ The application strictly separates database access (DAOs), business logic (Servi
 
 ## 8. AI Usage
 
-- **Paxel report URL:** [None - Local Dev Session Profile]
+- **Paxel report URL:** [None - Build using Antigravity Agent, which is not supported by Paxel CLI]
 
 ---
 
