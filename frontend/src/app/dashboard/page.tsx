@@ -6,24 +6,36 @@ import { authClient } from "@/lib/auth-client";
 import styles from "./dashboard.module.css";
 
 interface BillingRecord {
+  treatmentDate?: string;
   treatment_date?: string;
+  dateOfService?: string;
   date_of_service?: string;
+  cptCodes?: string[] | string;
   cpt_codes?: string[] | string;
+  cptCode?: string;
   cpt_code?: string;
   description?: string;
+  procedureDescription?: string;
   procedure_description?: string;
   provider?: string;
+  providerName?: string;
   provider_name?: string;
   insurers?: string[] | string;
+  insuranceCompany?: string;
   insurance_company?: string;
   charges?: number | string;
+  totalCharges?: number | string;
   total_charges?: number | string;
   paid?: number | string;
+  insPaid?: number | string;
+  ins_paid?: number | string;
+  amountPaid?: number | string;
   amount_paid?: number | string;
   adjustment?: number | string;
   payments?: number | string;
   balance?: number | string;
   page?: number;
+  pageNumber?: number;
   page_number?: number;
 }
 
@@ -77,6 +89,30 @@ export default function DashboardPage() {
   const [copiedError, setCopiedError] = useState(false);
   const [modalTab, setModalTab] = useState<"records" | "flags">("records");
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      setIsLightMode(true);
+      document.documentElement.classList.add("light");
+    } else {
+      document.documentElement.classList.remove("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isLightMode;
+    setIsLightMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -318,6 +354,9 @@ export default function DashboardPage() {
           <span>Antigravity Billing RLS</span>
         </div>
         <div className={styles.navUser}>
+          <button className={styles.themeToggleBtn} onClick={toggleTheme} title="Toggle Theme">
+            {isLightMode ? "🌙" : "☀️"}
+          </button>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{session.user.name}</span>
             <span className={styles.userEmail}>{session.user.email}</span>
@@ -532,16 +571,19 @@ export default function DashboardPage() {
                       </thead>
                       <tbody>
                         {selectedJob.result.billing_records.map((rec, i) => {
-                          const date = rec.treatment_date || rec.date_of_service || "-";
-                          const prov = rec.provider || rec.provider_name || "-";
-                          const desc = rec.description || rec.procedure_description || "-";
-                          const cpt = Array.isArray(rec.cpt_codes)
-                            ? rec.cpt_codes.join(", ")
-                            : rec.cpt_code || (typeof rec.cpt_codes === "string" ? rec.cpt_codes : "-");
+                          const date = rec.treatmentDate || rec.treatment_date || rec.dateOfService || rec.date_of_service || "-";
+                          const prov = rec.provider || rec.providerName || rec.provider_name || "-";
+                          const desc = rec.description || rec.procedureDescription || rec.procedure_description || "-";
                           
-                          const chargesVal = rec.charges !== undefined ? rec.charges : rec.total_charges;
-                          const paidVal = rec.paid !== undefined ? rec.paid : rec.amount_paid;
-                          const page = rec.page !== undefined ? rec.page : rec.page_number;
+                          const codes = rec.cptCodes || rec.cpt_codes;
+                          const code = rec.cptCode || rec.cpt_code;
+                          const cpt = Array.isArray(codes)
+                            ? codes.join(", ")
+                            : code || (typeof codes === "string" ? codes : "-");
+                          
+                          const chargesVal = rec.charges !== undefined ? rec.charges : (rec.totalCharges !== undefined ? rec.totalCharges : rec.total_charges);
+                          const paidVal = rec.paid !== undefined ? rec.paid : (rec.insPaid !== undefined ? rec.insPaid : (rec.ins_paid !== undefined ? rec.ins_paid : (rec.amountPaid !== undefined ? rec.amountPaid : rec.amount_paid)));
+                          const page = rec.page !== undefined ? rec.page : (rec.pageNumber !== undefined ? rec.pageNumber : rec.page_number);
 
                           return (
                             <tr key={i}>

@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 40px;
-  background: rgba(13, 20, 38, 0.4);
+  background: var(--bg-surface);
   border-bottom: 1px solid var(--bg-surface-border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -27,7 +27,7 @@
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -35,7 +35,7 @@
 .logoIcon {
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -50,6 +50,22 @@
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.themeToggleBtn {
+  background: none;
+  border: none;
+  color: var(--foreground-muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.themeToggleBtn:hover {
+  color: var(--accent-primary);
 }
 
 .userInfo {
@@ -71,7 +87,7 @@
 
 .signOutBtn {
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border: 1px solid var(--bg-surface-border);
   border-radius: var(--radius-sm);
   color: var(--foreground);
@@ -83,7 +99,7 @@
 }
 
 .signOutBtn:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--accent-danger-glow);
   border-color: rgba(239, 68, 68, 0.3);
   color: var(--accent-danger);
 }
@@ -130,13 +146,13 @@
 }
 
 .dropzone {
-  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border: 2px dashed var(--bg-surface-border);
   border-radius: var(--radius-md);
   padding: 40px 20px;
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-normal);
-  background: rgba(6, 9, 19, 0.3);
+  background: rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -145,7 +161,7 @@
 
 .dropzone:hover, .dropzoneActive {
   border-color: var(--accent-primary);
-  background: rgba(59, 130, 246, 0.04);
+  background: var(--accent-primary-glow);
 }
 
 .dropzoneIcon {
@@ -170,7 +186,7 @@
 .selectedFile {
   margin-top: 16px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.03);
   border: 1px solid var(--bg-surface-border);
   border-radius: var(--radius-sm);
   display: flex;
@@ -220,7 +236,7 @@
 
 .processBtn:hover:not(:disabled) {
   background: var(--accent-primary-hover);
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-glow);
 }
 
 .processBtn:disabled {
@@ -253,7 +269,7 @@
 }
 
 .jobCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent-primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
@@ -292,7 +308,7 @@
   gap: 16px;
   margin-top: 8px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--bg-surface-border);
   font-size: 12px;
   color: var(--foreground-muted);
 }
@@ -347,7 +363,7 @@
 .badgeFailed::before { background: var(--accent-danger); }
 
 .badgeCancelled {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(150, 150, 150, 0.1);
   color: var(--foreground-muted);
 }
 .badgeCancelled::before { background: var(--foreground-muted); }
@@ -407,7 +423,7 @@
 }
 
 .modalContent {
-  background: #0d1222;
+  background: var(--background);
   border: 1px solid var(--bg-surface-border);
   border-radius: var(--radius-lg);
   max-width: 1200px;
@@ -421,7 +437,7 @@
 
 .modalHeader {
   padding: 24px 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--bg-surface-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -458,7 +474,7 @@
 .tabs {
   display: flex;
   gap: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-surface-border);
   padding-bottom: 12px;
 }
 
@@ -497,9 +513,9 @@
 /* Extraction Table */
 .tableContainer {
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-surface-border);
   border-radius: var(--radius-md);
-  background: rgba(6, 9, 19, 0.3);
+  background: var(--bg-surface);
 }
 
 .table {
@@ -510,24 +526,24 @@
 }
 
 .table th {
-  background: rgba(13, 20, 38, 0.7);
+  background: rgba(0, 0, 0, 0.05);
   padding: 14px 20px;
   color: var(--foreground-muted);
   font-weight: 600;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-surface-border);
 }
 
 .table td {
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--bg-surface-border);
   color: var(--foreground);
 }
 
 .table tr:hover td {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 /* Flagged Records Styles */
@@ -589,24 +605,24 @@
 }
 
 .btnSecondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border: 1px solid var(--bg-surface-border);
   color: var(--foreground);
 }
 
 .btnSecondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.05);
+  border-color: var(--foreground-muted);
 }
 
 .errorBox {
-  background: rgba(239, 68, 68, 0.03);
+  background: var(--accent-danger-glow);
   border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   font-family: monospace;
   font-size: 13px;
-  color: #fca5a5;
+  color: var(--accent-danger);
   white-space: pre-wrap;
   word-break: break-all;
   max-height: 300px;
@@ -618,6 +634,6 @@
   justify-content: flex-end;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--bg-surface-border);
 }
 
